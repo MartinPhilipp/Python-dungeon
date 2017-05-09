@@ -1,1 +1,1 @@
-A Game like "rogue" to learning Python
+ A Game like "rogue" to learning Python 3
