@@ -1,18 +1,18 @@
 import random
 level = "...$$$..................................."
 hero = "@"
-herox = 0
+hero_x = 0
 while True:
     line = list(level)
     for x, char in enumerate(line):
         #print(x, char)
-        if x == herox:
+        if x == hero_x:
             print(hero, end="")
         else:
             print(line[x], end="")
     print()
     command = input("was jetzt?")
-    if command == "q":        
+    if command == "quit" or command == "exit":        
         break
     elif command == "a":
         herox -= 1
@@ -24,6 +24,3 @@ while True:
         herox += 3
     else:
         print("Drücke eine andere Taste")
-    # jump mit A und D
-    
-               
