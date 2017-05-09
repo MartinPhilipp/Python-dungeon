@@ -1,15 +1,19 @@
 import random
-level = "...$$$..................................."
+dungeon = "...$$$..................................."
 hero = "@"
 hero_x = 0
+
+level = list(dungeon)
+
+
+
 while True:
-    line = list(level)
-    for x, char in enumerate(line):
+    for x, char in enumerate(level):
         #print(x, char)
         if x == hero_x:
             print(hero, end="")
         else:
-            print(line[x], end="")
+            print(level[x], end="")
     print()
     command = input("was jetzt?")
     if command == "quit" or command == "exit":        
