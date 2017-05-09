@@ -15,12 +15,12 @@ while True:
     if command == "quit" or command == "exit":        
         break
     elif command == "a":
-        herox -= 1
+        hero_x -= 1
     elif command == "d":
-        herox += 1
+        hero_x += 1
     elif command == "A":
-        herox -= 3
+        hero_x -= 3
     elif command == "D":
-        herox += 3
+        hero_x += 3
     else:
         print("Drücke eine andere Taste")
