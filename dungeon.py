@@ -15,7 +15,6 @@ dungeon = """
 #................................####################.#
 #.....................................................#
 #................................#.#######............#
-#................................#.......#..........#.#
 #................................#.......#...########.#
 #................................#...........#..D..G..#
 #................................#........####.#..WD..#
@@ -28,6 +27,41 @@ hfood = {"a":"apple","m":"meat",}
 level = []
 for line in dungeon.splitlines():
     level.append(list(line))
+
+def strike(attacker, defender):
+    """attacking monster strikes vs. defending monster"""
+    hitdice = random.random()
+    evadedice = random.random()
+    damage = random.randint(1, attacker.maxdamage)
+    txt=""
+    txt+= "{} attacks {}! ({} hp left)\n".format(attacker.name, defender.name, defender.hp)
+    if hitdice > attacker.tohit:
+        txt += "The attack fails completely"
+        return txt
+    if evadedice < defender.evade:
+        txt += "But {} manages to evade the attack!".format(defender.name)
+        return txt
+    txt += "Ouch! {} makes {} damage to {}.\n".format(attacker.name, damage, defender.name)
+    defender.hp -= damage
+    if defender.hp <= 0:
+        txt +="{} is dead, {} wins!".format(defender.name, attacker.name)
+    return txt
+
+def fight(attacker, defender):
+    txt = "Strike!\n"
+    txt += strike(attacker, defender)
+    if defender.hp <= 0:
+        return txt
+    txt += "Counterstrike!\n"
+    txt += strike(defender, attacker)
+    return txt
+    
+
+        
+        
+        
+    
+    
 
 class Monster():
     number = 0
@@ -68,12 +102,20 @@ class Hero(Monster):
         pass
         
 class Dragon(Monster):
+    """giant boss, can only go left-right"""
     def __init__(self, posx, posy):
         Monster.__init__(self, posx, posy, "D", "Dragon", 50, 0.8, 0.1, 7)
+    
+    def walk(self):
+        return random.choice((-1, 0, 1)), 0
         
 class Goblin(Monster):
+    """little monster that can never stand still"""
     def __init__(self, posx, posy):
         Monster.__init__(self, posx, posy, "G", "Goblin", 10, 0.4, 0.5, 3)
+        
+    def walk(self):
+        return random.choice((-1, 1)), random.choice((-1, 1))
         
 class Wolf(Monster):
     def __init__(self, posx, posy):
@@ -95,11 +137,12 @@ for y, line in enumerate(level):
 
 
 #-------------------main loop--------------
-while True:
-    hero.hunger += 1
-    hero.hp += 1
-    if hero.poison:
-        hero.hp -= 3
+while hero.hp >0 and hero.hunger < 100:
+    if random.random() < 0.3:
+        hero.hunger += 1
+    #hero.hp += 1
+    #if hero.poison:
+    #    hero.hp -= 3
 
     for y, line in enumerate(level):
         for x, char in enumerate(line):
@@ -160,14 +203,28 @@ while True:
         if monster.number == hero.number:
             continue
         if monster.x == hero.x and monster.y == hero.y:
-            print("epic fight against" + monster.report())
-            print("Hero wins, monster is dead")
-            #kill monster
-            del Monster.zoo[monster.number]
-            break
+            #print("epic fight against" + monster.report())
+            #
+            #print("Hero wins, monster is dead")
+            input(fight(hero, monster))
+            if monster.hp <= 0:
+                #kill monster
+                del Monster.zoo[monster.number]
+                break
+            if hero.hp <= 0:
+                break
         dx, dy = monster.walk()
         if level[monster.y + dy][monster.x + dx] == "#":
             dy = 0
             dx = 0
+        if (monster.y + dy == hero.y) and (monster.x + dx == hero.x):
+            dx = 0
+            dy = 0
+            input(fight(monster, hero))
+            if monster.hp <= 0:
+                del Monster.zoo[monster.number]
+                break
+            if hero.hp <= 0:
+                break
         monster.x += dx
         monster.y += dy
