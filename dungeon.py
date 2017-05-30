@@ -55,12 +55,36 @@ def fight(attacker, defender):
     txt += strike(defender, attacker)
     return txt
     
+class Item():
+    number = 0
+    storage = {}
+    
+    def __init__(self, char = "x", name = "pile of junk", x = 5, y = 5):
+        self.char = char
+        self.name = name
+        self.x = x
+        self.y = y
+        self.number = Item.number
+        Item.number += 1
+        Item.storage[self.number] = self
+        
+class Potion(Item):
+    
+    def __init__(self, char = "p", name = "strange potion", x = 5, y = 5):
+        Item.__init__(self, char, name, x, y)
+        self.effect_hp = random.randint(-1, 5)
+        self.effect_tohit = random.random() * 0.2 -0.05
+        self.effect_evade = random.random() * 0.2 -0.05
+        self.effect_hunger = random.randint(-30,5)
+    
+    def report(self):
+        txt = "This is potion number {}\n".format(self.number)
+        txt += "Effect on hitpoints: {}\n".format(self.effect_hp)
+        txt += "Effect on tohit chance: {}\n".format(self.effect_tohit)
+        txt += "Effect on evade chance: {}\n".format(self.effect_evade)
+        txt += "Effect on hunger: {}\n".format(self.effect_hunger)
+        return txt
 
-        
-        
-        
-    
-    
 
 class Monster():
     number = 0
@@ -157,7 +181,7 @@ while hero.hp >0 and hero.hunger < 100:
                 print(level[y][x], end = "")
            
         print()
-    command = input("$: {} hunger {} hp: {} what now?".format(hero.gold, hero.hunger, hero.hp))
+    command = input("$: {}; hunger {}; hp: {}; tohit: {}; evade: {}; maxd: {}; what now?".format(hero.gold, hero.hunger, hero.hp, hero.tohit, hero.evade, hero.maxdamage))
     hero.hunger += 1
     dx = 0 
     dy = 0
@@ -178,8 +202,10 @@ while hero.hp >0 and hero.hunger < 100:
     elif command == "w":
         dy = -1
     elif command == "s":
-        
         dy = 1
+    elif command == "p":
+        print("You created a new potion!")
+        input(Potion().report())
     else:
         print("Press other key!")
     #---------wall check-----------
