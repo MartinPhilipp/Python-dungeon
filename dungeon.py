@@ -121,7 +121,7 @@ class Monster():
         
 class Hero(Monster):
     def __init__(self):
-        Monster.__init__(self, 1, 2, "@", "hero", 30, 0.7, 0.3, 5)
+        Monster.__init__(self, 1, 2, "@", "hero", 3000, 0.7, 0.3, 5)
         self.hunger = 0
         self.gold = 0
         self.poison = False
@@ -181,7 +181,7 @@ for y, line in enumerate(level):
 
 
 #-------------------main loop--------------
-while hero.hp >0 and hero.hunger < 100:
+while hero.hp >0 and hero.hunger < 1000:
     if random.random() < 0.3:
         hero.hunger += 1
     #hero.hp += 1
@@ -226,6 +226,7 @@ while hero.hp >0 and hero.hunger < 100:
         input(Potion().report())
     else:
         print("Press other key!")
+    print("hero is moving")
     #---------wall check-----------
     if level[hero.y+dy][hero.x+dx] == "#":
         print("Ouch!")
@@ -240,10 +241,70 @@ while hero.hp >0 and hero.hunger < 100:
             print("Ouch! Find a key (k)")
             dx = 0
             dy = 0
-    # ------ movement--------  
+    # ------ monster check ------
+    for monster in Monster.zoo.values():
+        if monster.number == hero.number:
+            continue
+        if monster.x == hero.x + dx and monster.y == hero.y + dy:
+            # ----- hero attacks monster ------
+            dx = 0
+            dy = 0
+            input(fight(hero, monster))
+            if monster.hp <= 0:
+                #kill monster
+                del Monster.zoo[monster.number]
+                break
+            if hero.hp <= 0:
+                break
+    if hero.hp <= 0:
+        break    
+    # ------ hero movement--------  
     hero.x += dx
     hero.y += dy
-         
+    print("monsters are moving")
+    dx, dy = 0, 0
+    # --- check monster movement ------ 
+    for monster in Monster.zoo.values():
+        if monster.number == hero.number:
+            continue
+        dx, dy = monster.walk()
+        #------wall test for monsters------
+        if level[monster.y + dy][monster.x + dx] == "#":
+            dy = 0
+            dx = 0
+        if level[monster.y + dy][monster.x + dx] == "d":
+            dy = 0
+            dx = 0
+        #-------test if walking into other monsters
+        for monster2 in Monster.zoo.values():
+            if monster2.number == hero.number:
+                continue
+            if monster2.number == monster.number:
+                continue
+            if monster.y + dy == monster2.y and monster.x +dx == monster2.x:
+                dx = 0
+                dy = 0
+        #--------monster attacking hero-----------
+        if (monster.y + dy == hero.y) and (monster.x + dx == hero.x):
+            dx = 0
+            dy = 0
+            input(fight(monster, hero))
+            if monster.hp <= 0:
+                #del Monster.zoo[monster.number]
+                #break
+                continue
+            if hero.hp <= 0:
+                break
+        monster.x += dx
+        monster.y += dy
+    # ----- kill off dead monsters ------
+    if hero.hp <= 0:
+        break
+    monsternumbers = list(Monster.zoo.keys())
+    for n in monsternumbers:
+        if Monster.zoo[n].hp <= 0:
+            del Monster.zoo[n]
+    # ------- find stuff ---------     
     stuff = level[hero.y][hero.x]
     if stuff == "$":
         hero.gold += 1
@@ -257,47 +318,4 @@ while hero.hp >0 and hero.hunger < 100:
     elif stuff == "m":
         hero.hunger -= 20
         level[hero.y][hero.x] = "."
-    #check monsters
-    for monster in Monster.zoo.values():
-        if monster.number == hero.number:
-            continue
-        if monster.x == hero.x and monster.y == hero.y:
-            #print("epic fight against" + monster.report())
-#--------------hero attacks monter---------
-            #print("Hero wins, monster is dead")
-            input(fight(hero, monster))
-            if monster.hp <= 0:
-                #kill monster
-                del Monster.zoo[monster.number]
-                break
-            if hero.hp <= 0:
-                break
-        dx, dy = monster.walk()
-    #------wall test for monsters------
-        if level[monster.y + dy][monster.x + dx] == "#":
-            dy = 0
-            dx = 0
-        if level[monster.y + dy][monster.x + dx] == "d":
-            dy = 0
-            dx = 0
-    #-------test if walking into other monsters
-        for monster2 in Monster.zoo.values():
-            if monster2.number == hero.number:
-                continue
-            if monster2.number == monster.number:
-                continue
-            if monster.y + dy == monster2.y and monster.x +dx == monster2.x:
-                dx = 0
-                dy = 0
-    #--------monster attacking hero-----------
-        if (monster.y + dy == hero.y) and (monster.x + dx == hero.x):
-            dx = 0
-            dy = 0
-            input(fight(monster, hero))
-            if monster.hp <= 0:
-                del Monster.zoo[monster.number]
-                break
-            if hero.hp <= 0:
-                break
-        monster.x += dx
-        monster.y += dy
+  
