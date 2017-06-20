@@ -1,7 +1,8 @@
-import random   
+import random
+#create more level
 dungeon = """
 #######################################################
-#....$$$...........Da....G.#.....$.m.G....#....W..P...#
+#..s.$$$...........Da....G.#.....$.m.G....#....W..P...#
 ##############.###########.#####.............#.....####
 #..D..D...$$$#.###########....s#.......####...........#
 #....#########.##..$$$...####..#..................#WW.#
@@ -12,20 +13,60 @@ dungeon = """
 #$$$.mm....D......################.#..........#.###G#.#
 #d###############.#....W..W..W.....#..........#GG.G.#.#
 #.#.............#.#...W....W.....#.##################m#
-#.#.............#...W...W....W...#.........#...#...#.##
-#.#....:........#....W...W..W..W.#.#######.#.#...#....#
-#.#.............#W...W.W....W....#..#....#.#.########.#
-#.#.............################.#..#.##.....#..D..G..#
+#.#.###########.#...W...W....W...#.........#...#...#.##
+#.#.#........$#.#....W...W..W..W.#.#######.#.#...#....#
+#.#...........#.#W...W.W....W....#..#....#.#.########.#
+#.#############.################.#..#.##.....#..D..G..#
 #.....................#.#.#.#.......#.########.#..WD..#
 ################....#D.......D####........#....#D.W...#
 #v$$$#..T..#...#....##############.######.#.###########
 #$$$$d.T.T...#......#mm$...........#......#......$$$$k#
 #######################################################
 """
-hfood = {"a":"apple","m":"meat",}
 level = []
 for line in dungeon.splitlines():
     level.append(list(line))
+
+def shop():
+    print("You entered a shop!")
+    print("Number  Name                   Price")
+    shelf = []
+    
+    shelf.append(Potion_hp())
+    shelf.append(Potion_evade())
+    shelf.append(Potion_hunger())
+    shelf.append(Potion_tohit())
+    for d in shelf:
+        d.shop = True
+        d.setprice()
+        print("{:<5}   {:<20}   {:<5}".format(d.number, d.name, d.price))
+    number = input("Enter item number to buy.")
+    try:
+        number = int(number)
+    except:
+        print("Wrong number entered!")
+        return
+    # correct drink number for shelf?
+    if number in Item.storage:
+        print("This drink exist...")
+    else:
+        print("This drink does not exist")
+        return
+    drink = Item.storage[number]
+    if drink.shop:
+        print("and i can sell it to you")
+    else:
+        print("This drink is not in my shop!")
+        return
+    if hero.gold < drink.price:
+        print("You have not enough money!")
+        return
+    drink.shop = False
+    drink.backpack = hero.number
+    print("Thank you for your visit!")        
+    
+    
+
 
 def strike(attacker, defender):
     """attacking monster strikes vs. defending monster"""
@@ -64,18 +105,21 @@ class Item():
         self.name = name
         self.x = x
         self.y = y
+        self.shop = False
+        self.backpack = None
         self.number = Item.number
         Item.number += 1
         Item.storage[self.number] = self
         
 class Potion(Item):
     
-    def __init__(self, char = "p", name = "strange potion", x = 5, y = 5):
+    def __init__(self, x = 0, y = 0, char = "p", name = "strange potion"):
         Item.__init__(self, char, name, x, y)
         self.effect_hp = random.randint(-1, 5)
         self.effect_tohit = random.random() * 0.2 -0.05
         self.effect_evade = random.random() * 0.2 -0.05
         self.effect_hunger = random.randint(-30,5)
+        self.price = 0
     
     def report(self):
         txt = "This is potion number {}\n".format(self.number)
@@ -84,12 +128,52 @@ class Potion(Item):
         txt += "Effect on evade chance: {}\n".format(self.effect_evade)
         txt += "Effect on hunger: {}\n".format(self.effect_hunger)
         return txt
+    
+    
         
-class hp_Potion(Potion):
-	def __init__(self):
-		Item.__init__(self, char = "h", name = "healthy potion", x = 5, y = 5)
-		self.effect_hp = random.randint(-1, 15)
+class Potion_hp(Potion):
+    def __init__(self, x = 0, y = 0, char = "h", name = "healthy potion"):
+        Item.__init__(self, char, name, x, y)
+        self.effect_hp = random.randint(-1, 15)
+        self.effect_tohit = 0
+        self.effect_evade = 0
+        self.effect_hunger = 0
+        
+    def setprice(self):
+        self.price = random.randint(1, 5)
 
+class Potion_hunger(Potion):
+    def __init__(self, x = 0, y = 0, char = "b", name = "Anti-hunger Beer"):
+        Item.__init__(self, char, name, x ,y)
+        self.effect_hp = 0
+        self.effect_tohit = 0
+        self.effect_evade = 0
+        self.effect_hunger = random.randint(-30, 5)
+        
+    def setprice(self):
+        self.price = random.randint(1, 5)
+        
+class Potion_tohit(Potion):
+    def __init__(self, x = 0, y = 0, char = "t", name = "Tohit potion"):
+        Item.__init__(self, char, name, x ,y)
+        self.effect_hp = 0
+        self.effect_tohit = random.randint(-1, 3)
+        self.effect_evade = 0
+        self.effect_hunger = 0
+        
+    def setprice(self):
+        self.price = random.randint(1, 5)
+
+class Potion_evade(Potion):
+    def __init__(self, x = 0, y = 0, char = "e", name = "Evade potion"):
+        Item.__init__(self, char, name, x ,y)
+        self.effect_hp = 0
+        self.effect_tohit = 0
+        self.effect_evade = random.randint(-1, 3)
+        self.effect_hunger = 0
+        
+    def setprice(self):
+        self.price = random.randint(1, 5)
 
 class Monster():
     number = 0
@@ -119,9 +203,16 @@ class Monster():
     def walk(self):
         return random.choice((-1, 0, 1)), random.choice((-1, 0, 1))
         
+    def drink(self, potion):
+        self.hp += potion.effect_hp
+        self.tohit += potion.effect_tohit
+        self.evade += poton.effect_evade
+        self.hunger += potion.effect_hunger
+        print("You drink the potion and reveil the effects...")
+        
 class Hero(Monster):
     def __init__(self):
-        Monster.__init__(self, 1, 2, "@", "hero", 3000, 0.7, 0.3, 5)
+        Monster.__init__(self, 1, 2, "@", "hero", 40, 0.7, 0.3, 5)
         self.hunger = 0
         self.gold = 0
         self.poison = False
@@ -178,24 +269,38 @@ for y, line in enumerate(level):
                 Goblin(x,y)
             elif char == "W":
                 Wolf(x,y)
-
-
-#-------------------main loop--------------
-while hero.hp >0 and hero.hunger < 1000:
+            elif char == "T":
+                Devil(x,y)
+#--------------------generate potions----------
+        if char in "ph":
+            level[y][x] = "."
+            if char == "p":
+                Potion(x,y)
+            elif char == "h":
+                Potion_hp(x,y)
+            
+#--------------------main loop--------------
+while hero.hp >0 and hero.hunger < 100:
     if random.random() < 0.3:
         hero.hunger += 1
     #hero.hp += 1
     #if hero.poison:
     #    hero.hp -= 3
-
+#--------------------printing the dungeon----------
     for y, line in enumerate(level):
         for x, char in enumerate(line):
-            #print(x, char)
+            dirty = False
             for monster in Monster.zoo.values():
                 if monster.x == x and monster.y == y:
                     print(monster.char, end = "")
+                    dirty = True
                     break
             else:
+                for item in Item.storage.values():
+                    if item.backpack is None and item.x == x and item.y == y:
+                        print(item.char, end = ".")
+                        dirty = True
+            if not dirty:
                 print(level[y][x], end = "")
            
         print()
@@ -221,9 +326,21 @@ while hero.hp >0 and hero.hunger < 1000:
         dy = -1
     elif command == "s":
         dy = 1
-    elif command == "p":
-        print("You created a new potion!")
-        input(Potion().report())
+    elif command == "i":
+        print("Your inventory:")
+        for i in Item.storage.values():
+            if i.backpack == hero.number:
+                print(i.number, i.name)
+        drinknumber = input("Press number to use item or enter to leave")
+        try:
+            drinknumber = int(i)
+        except:
+            print("Wrong number entered!")
+            drinknumber = None
+        if drinknumber in Item.storage:
+            if Item.storage[drinknumber].backback == hero.number:
+                hero.drink(Item.storage[drinknumber])
+                del Item.storage[drinknumber]
     else:
         print("Press other key!")
     print("hero is moving")
@@ -258,12 +375,12 @@ while hero.hp >0 and hero.hunger < 1000:
                 break
     if hero.hp <= 0:
         break    
-    # ------ hero movement--------  
+    # ------------------------------ hero movement--------  
     hero.x += dx
     hero.y += dy
     print("monsters are moving")
     dx, dy = 0, 0
-    # --- check monster movement ------ 
+    # ------------------------check monster movement ------ 
     for monster in Monster.zoo.values():
         if monster.number == hero.number:
             continue
@@ -297,16 +414,24 @@ while hero.hp >0 and hero.hunger < 1000:
                 break
         monster.x += dx
         monster.y += dy
-    # ----- kill off dead monsters ------
+    # ----- kill of dead monsters ------
     if hero.hp <= 0:
         break
     monsternumbers = list(Monster.zoo.keys())
     for n in monsternumbers:
         if Monster.zoo[n].hp <= 0:
             del Monster.zoo[n]
-    # ------- find stuff ---------     
+#--------------------find stuff----------
+#--------------------find -potions---------
+    for p in Item.storage.values():
+        if p.x == hero.x and hero.y == hero.y:
+            p.backpack = hero.number
+            print("You found an Item and put it into inventory!")
+#--------------------find other stuff----------     
     stuff = level[hero.y][hero.x]
-    if stuff == "$":
+    if stuff == "s":
+        shop()
+    elif stuff == "$":
         hero.gold += 1
         level[hero.y][hero.x] = "."
     elif stuff == "k":
@@ -319,3 +444,4 @@ while hero.hp >0 and hero.hunger < 1000:
         hero.hunger -= 20
         level[hero.y][hero.x] = "."
   
+v
