@@ -4,9 +4,9 @@ dungeon = """
 #######################################################
 #..s.$$$...........Da....G.#.....$.m.G....#....W..P...#
 ##############.###########.#####.............#.....####
-#..D..D...$$$#.###########....s#.......####...........#
-#....#########.##..$$$...####..#..................#WW.#
-#....#..WW.....######....#.###.#.........#.############
+#..D..D...$$$#h###########....s#.......####...........#
+#....#########p##..$$$...####..#..................#WW.#
+#....#..WW.....######....#.###.#....p....#.############
 #..GG########.k.#.......#.D.................#...d....s#
 #.............#.#.......#.W........G..........#.#######
 ###############.#................#.#.........##..GG..G#
@@ -61,6 +61,7 @@ def shop():
     if hero.gold < drink.price:
         print("You have not enough money!")
         return
+    hero.gold -= drink.price
     drink.shop = False
     drink.backpack = hero.number
     print("Thank you for your visit!")        
@@ -120,6 +121,7 @@ class Potion(Item):
         self.effect_evade = random.random() * 0.2 -0.05
         self.effect_hunger = random.randint(-30,5)
         self.price = 0
+        self.backpack = None
     
     def report(self):
         txt = "This is potion number {}\n".format(self.number)
@@ -206,7 +208,7 @@ class Monster():
     def drink(self, potion):
         self.hp += potion.effect_hp
         self.tohit += potion.effect_tohit
-        self.evade += poton.effect_evade
+        self.evade += potion.effect_evade
         self.hunger += potion.effect_hunger
         print("You drink the potion and reveil the effects...")
         
@@ -333,14 +335,16 @@ while hero.hp >0 and hero.hunger < 100:
                 print(i.number, i.name)
         drinknumber = input("Press number to use item or enter to leave")
         try:
-            drinknumber = int(i)
+            drinknumber = int(drinknumber)
         except:
             print("Wrong number entered!")
             drinknumber = None
         if drinknumber in Item.storage:
-            if Item.storage[drinknumber].backback == hero.number:
+            if Item.storage[drinknumber].backpack == hero.number:
+                print(Item.storage[drinknumber].report())
                 hero.drink(Item.storage[drinknumber])
                 del Item.storage[drinknumber]
+                
     else:
         print("Press other key!")
     print("hero is moving")
@@ -424,9 +428,9 @@ while hero.hp >0 and hero.hunger < 100:
 #--------------------find stuff----------
 #--------------------find -potions---------
     for p in Item.storage.values():
-        if p.x == hero.x and hero.y == hero.y:
+        if p.x == hero.x and p.y == hero.y:
             p.backpack = hero.number
-            print("You found an Item and put it into inventory!")
+            print("You found an Item and put it into your inventory!")
 #--------------------find other stuff----------     
     stuff = level[hero.y][hero.x]
     if stuff == "s":
@@ -444,4 +448,4 @@ while hero.hp >0 and hero.hunger < 100:
         hero.hunger -= 20
         level[hero.y][hero.x] = "."
   
-v
+
