@@ -1,5 +1,8 @@
 import random
 #create more level
+#  > stair up
+#  < stair down
+
 dungeon = """
 #######################################################
 #..s.$$$...........Da....G.#.....$.m.G....#....W..P...#
@@ -19,13 +22,62 @@ dungeon = """
 #.#############.################.#..#.##.....#..D..G..#
 #.....................#.#.#.#.......#.########.#..WD..#
 ################....#D.......D####........#....#D.W...#
-#v$$$#..T..#...#....##############.######.#.###########
+#<$$$#..T..#...#....##############.######.#.###########
 #$$$$d.T.T...#......#mm$...........#......#......$$$$k#
 #######################################################
 """
-level = []
-for line in dungeon.splitlines():
-    level.append(list(line))
+dungeon_2 = """
+#######################################################
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#>....................................................#
+#<....................................................#
+#######################################################
+"""
+dungeon_3 = """
+#######################################################
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#.....................................................#
+#<....................................................#
+#>....................................................#
+#######################################################
+"""
+levels = []
+for dung in ( dungeon, dungeon_2, dungeon_3):
+    level = []
+    for line in dung.splitlines():
+        level.append(list(line))
+    levels.append(level)
 
 def shop():
     print("You entered a shop!")
@@ -101,11 +153,12 @@ class Item():
     number = 0
     storage = {}
     
-    def __init__(self, char = "x", name = "pile of junk", x = 5, y = 5):
+    def __init__(self, char = "x", name = "pile of junk", x = 5, y = 5, z = 5):
         self.char = char
         self.name = name
         self.x = x
         self.y = y
+        self.z = z
         self.shop = False
         self.backpack = None
         self.number = Item.number
@@ -114,8 +167,8 @@ class Item():
         
 class Potion(Item):
     
-    def __init__(self, x = 0, y = 0, char = "p", name = "strange potion"):
-        Item.__init__(self, char, name, x, y)
+    def __init__(self, x = 0, y = 0, z = 0, char = "p", name = "strange potion"):
+        Item.__init__(self, char, name, x, y, z)
         self.effect_hp = random.randint(-1, 5)
         self.effect_tohit = random.random() * 0.2 -0.05
         self.effect_evade = random.random() * 0.2 -0.05
@@ -134,8 +187,8 @@ class Potion(Item):
     
         
 class Potion_hp(Potion):
-    def __init__(self, x = 0, y = 0, char = "h", name = "healthy potion"):
-        Item.__init__(self, char, name, x, y)
+    def __init__(self, x = 0, y = 0, z = 0, char = "h", name = "healthy potion"):
+        Item.__init__(self, char, name, x, y, z)
         self.effect_hp = random.randint(-1, 15)
         self.effect_tohit = 0
         self.effect_evade = 0
@@ -146,7 +199,7 @@ class Potion_hp(Potion):
 
 class Potion_hunger(Potion):
     def __init__(self, x = 0, y = 0, char = "b", name = "Anti-hunger Beer"):
-        Item.__init__(self, char, name, x ,y)
+        Item.__init__(self, char, name, x, y, z)
         self.effect_hp = 0
         self.effect_tohit = 0
         self.effect_evade = 0
@@ -157,7 +210,7 @@ class Potion_hunger(Potion):
         
 class Potion_tohit(Potion):
     def __init__(self, x = 0, y = 0, char = "t", name = "Tohit potion"):
-        Item.__init__(self, char, name, x ,y)
+        Item.__init__(self, char, name, x , y, z)
         self.effect_hp = 0
         self.effect_tohit = random.randint(-1, 3)
         self.effect_evade = 0
@@ -168,7 +221,7 @@ class Potion_tohit(Potion):
 
 class Potion_evade(Potion):
     def __init__(self, x = 0, y = 0, char = "e", name = "Evade potion"):
-        Item.__init__(self, char, name, x ,y)
+        Item.__init__(self, char, name, x, y, z)
         self.effect_hp = 0
         self.effect_tohit = 0
         self.effect_evade = random.randint(-1, 3)
@@ -182,10 +235,11 @@ class Monster():
     zoo = {}
     chars = ""
     
-    def __init__(self, posx = 0, posy = 0, char = "M", name = "Monster", hp = 20,
+    def __init__(self, posx = 0, posy = 0, posz = 0, char = "M", name = "Monster", hp = 20,
                  tohit = 0.6, evade = 0.2, maxdamage = 5):
         self.x = posx
         self.y = posy
+        self.z = posz
         self.char = char
         self.name = name
         self.hp = hp
@@ -214,7 +268,7 @@ class Monster():
         
 class Hero(Monster):
     def __init__(self):
-        Monster.__init__(self, 1, 2, "@", "hero", 40, 0.7, 0.3, 5)
+        Monster.__init__(self, 1, 2, 0, "@", "hero", 40, 0.7, 0.3, 5)
         self.hunger = 0
         self.gold = 0
         self.poison = False
@@ -225,35 +279,35 @@ class Hero(Monster):
         
 class Dragon(Monster):
     """giant boss, can only go left-right"""
-    def __init__(self, posx, posy):
-        Monster.__init__(self, posx, posy, "D", "Dragon", 50, 0.8, 0.1, 7)
+    def __init__(self, posx, posy, posz):
+        Monster.__init__(self, posx, posy, posz, "D", "Dragon", 50, 0.8, 0.1, 7)
     
     def walk(self):
         return random.choice((-1, 0, 1)), 0
         
 class Goblin(Monster):
     """little monster that can never stand still"""
-    def __init__(self, posx, posy):
-        Monster.__init__(self, posx, posy, "G", "Goblin", 10, 0.4, 0.5, 3)
+    def __init__(self, posx, posy, posz):
+        Monster.__init__(self, posx, posy, posz, "G", "Goblin", 10, 0.4, 0.5, 3)
         
     def walk(self):
         return random.choice((-1, 1)), random.choice((-1, 1))
         
 class Wolf(Monster):
-    def __init__(self, posx, posy):
-        Monster.__init__(self, posx, posy, "W", "Wolf", 8, 0.6, 0.6, 2)
+    def __init__(self, posx, posy, posz):
+        Monster.__init__(self, posx, posy, posz, "W", "Wolf", 8, 0.6, 0.6, 2)
 
 class Devil(Monster):
     """giant boss"""
-    def __init__(self, posx, posy):
-        Monster.__init__(self, posx, posy, "T", "Devil", 50, 0.8, 0.3, 10)
+    def __init__(self, posx, posy, posz):
+        Monster.__init__(self, posx, posy, posz, "T", "Devil", 50, 0.8, 0.3, 10)
     def walk(self):
         return random.choice((-2,-1,0,1,2)), random.choice((-2,-1,0,1,2))
         
 class Ghost(Monster):
     """small ghost, high damage"""
-    def __init__(self, posx, posy):
-        Monster.__init__(self, posx, posy, "S", "Ghost", 3, 0.5, 0.5, 20)
+    def __init__(self, posx, posy, posz):
+        Monster.__init__(self, posx, posy, posz, "S", "Ghost", 3, 0.5, 0.5, 20)
     
         
 #class Ghost
@@ -261,27 +315,30 @@ class Ghost(Monster):
 #generate monsters
 
 hero = Hero()
-for y, line in enumerate(level):
-    for x, char in enumerate(line):
-        if char in "DGW":
-            level[y][x] = "."
-            if char == "D":
-                Dragon(x,y)
-            elif char == "G":
-                Goblin(x,y)
-            elif char == "W":
-                Wolf(x,y)
-            elif char == "T":
-                Devil(x,y)
-#--------------------generate potions----------
-        if char in "ph":
-            level[y][x] = "."
-            if char == "p":
-                Potion(x,y)
-            elif char == "h":
-                Potion_hp(x,y)
+for z, level in enumerate(levels):
+    for y, line in enumerate(level):
+        for x, char in enumerate(line):
+            if char in "DGW":
+                #level[y][x] = "."
+                levels[z][y][x] = "."
+                if char == "D":
+                    Dragon(x,y,z)
+                elif char == "G":
+                    Goblin(x,y,z)
+                elif char == "W":
+                    Wolf(x,y,z)
+                elif char == "T":
+                    Devil(x,y,z)
+    #--------------------generate potions----------
+            if char in "ph":
+                levels[z][y][x] = "."
+                if char == "p":
+                    Potion(x,y,z)
+                elif char == "h":
+                    Potion_hp(x,y,z)
             
 #--------------------main loop--------------
+level = levels[hero.z]
 while hero.hp >0 and hero.hunger < 100:
     if random.random() < 0.3:
         hero.hunger += 1
@@ -293,13 +350,13 @@ while hero.hp >0 and hero.hunger < 100:
         for x, char in enumerate(line):
             dirty = False
             for monster in Monster.zoo.values():
-                if monster.x == x and monster.y == y:
+                if monster.x == x and monster.y == y and monster.z == hero.z:
                     print(monster.char, end = "")
                     dirty = True
                     break
             else:
                 for item in Item.storage.values():
-                    if item.backpack is None and item.x == x and item.y == y:
+                    if item.backpack is None and item.x == x and item.y == y and item.z == hero.z:
                         print(item.char, end = "")
                         dirty = True
             if not dirty:
@@ -344,7 +401,18 @@ while hero.hp >0 and hero.hunger < 100:
                 print(Item.storage[drinknumber].report())
                 hero.drink(Item.storage[drinknumber])
                 del Item.storage[drinknumber]
-                
+    elif command == "<":
+        if hero.z < len(levels) -1:
+           # print("You can not go down anymore!")
+            #continue
+            hero.z += 1
+            level = levels[hero.z]
+    elif command == ">":
+        if hero.z > 0:
+            #print("You can not go up anymore!")
+            #continue
+            hero.z -= 1
+            level = levels[hero.z]
     else:
         print("Press other key!")
     print("hero is moving")
@@ -366,13 +434,14 @@ while hero.hp >0 and hero.hunger < 100:
     for monster in Monster.zoo.values():
         if monster.number == hero.number:
             continue
+        if monster.z != hero.z:
+            continue
         if monster.x == hero.x + dx and monster.y == hero.y + dy:
-            # ----- hero attacks monster ------
+    # ----- hero attacks monster ------
             dx = 0
             dy = 0
             input(fight(hero, monster))
             if monster.hp <= 0:
-                #kill monster
                 del Monster.zoo[monster.number]
                 break
             if hero.hp <= 0:
@@ -388,6 +457,8 @@ while hero.hp >0 and hero.hunger < 100:
     for monster in Monster.zoo.values():
         if monster.number == hero.number:
             continue
+        if monster.z != hero.z:
+            continue
         dx, dy = monster.walk()
         #------wall test for monsters------
         if level[monster.y + dy][monster.x + dx] == "#":
@@ -402,6 +473,8 @@ while hero.hp >0 and hero.hunger < 100:
                 continue
             if monster2.number == monster.number:
                 continue
+            if monster2.z != hero.z:
+                continue
             if monster.y + dy == monster2.y and monster.x +dx == monster2.x:
                 dx = 0
                 dy = 0
@@ -411,8 +484,6 @@ while hero.hp >0 and hero.hunger < 100:
             dy = 0
             input(fight(monster, hero))
             if monster.hp <= 0:
-                #del Monster.zoo[monster.number]
-                #break
                 continue
             if hero.hp <= 0:
                 break
@@ -428,7 +499,7 @@ while hero.hp >0 and hero.hunger < 100:
 #--------------------find stuff----------
 #--------------------find -potions---------
     for p in Item.storage.values():
-        if p.x == hero.x and p.y == hero.y:
+        if p.x == hero.x and p.y == hero.y and p.z == hero.z:
             p.backpack = hero.number
             print("You found an Item and put it into your inventory!")
 #--------------------find other stuff----------     
